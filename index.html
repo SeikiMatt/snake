@@ -6,13 +6,13 @@
     <title>Snake</title>
   </head>
   <body>
-    <canvas id="game-field" width="500" height="500"></canvas>
+    <canvas id="game-field" width="1000" height="500"></canvas>
   </body>
   <script>
     const screen = document.getElementById("game-field");
 
     const rows = 25;
-    const cols = 25;
+    const cols = 50;
 
     //const gameGrid = Array.from(Array(rows), () => new Array(cols).fill(0));
 
@@ -31,19 +31,20 @@
     // TODO Score counter
 
     function checkSelfCollision() {
-      let snakeBody = snake.slice(1);
-      let snakeHead = snake[0].concat();
+      let body = snake.slice(1);
+      let head = snake[0].concat();
 
-      return snakeBody.some(
-        (segment) => segment[0] === snakeHead[0] && segment[1] === snakeHead[1]
+      return body.some(
+        (segment) => segment[0] === head[0] 
+        && segment[1] === head[1]
       );
     }
 
     function checkEdgeCollision() {
       let head = snake[0].concat();
-      return head[0] > rows - 1 ? true
+      return head[0] > cols - 1 ? true
         : head[0] < 0 ? true
-        : head[1] > cols - 1 ? true
+        : head[1] > rows - 1 ? true
         : head[1] < 0 ? true
         : false
     }
@@ -94,8 +95,8 @@
         const tileWidth = screen.offsetWidth / cols;
         const tileHeight = screen.offsetHeight / rows;
 
-        for (let x = 0; x < rows; x++) {
-          for (let y = 0; y < cols; y++) {
+        for (let x = 0; x < cols; x++) {
+          for (let y = 0; y < rows; y++) {
             ctx.fillStyle = snake.find(
               (segment) => segment[0] === x && segment[1] === y
             )
