@@ -16,6 +16,25 @@
 
     const snakeGrid = Array.from(Array(rows), () => new Array(cols).fill(0));
 
+    function draw(snakeGrid, fruitPos) {
+      if (screen.getContext) {
+        const ctx = screen.getContext("2d");
+
+        const tileWidth = screen.offsetWidth / cols;
+        const tileHeight = screen.offsetHeight / rows;
+
+        for (let x = 0; x < rows; x++) {
+          for (let y = 0; y < cols; y++) {
+            ctx.fillStyle = snakeGrid[x][y] === 1 ? "white" : "grey";
+            ctx.fillRect(x * tileWidth, y * tileHeight, tileWidth, tileHeight);
+          }
+        }
+      }
+    }
+
+    draw(snakeGrid);
+
+    //window.setInterval(() => draw(), 50);
   </script>
   <style>
     body {
