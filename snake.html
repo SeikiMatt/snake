@@ -9,6 +9,13 @@
     <canvas id="game-field" width="500" height="500"></canvas>
   </body>
   <script>
+    const screen = document.getElementById("game-field");
+
+    const rows = 20;
+    const cols = 20;
+
+    const snakeGrid = Array.from(Array(rows), () => new Array(cols).fill(0));
+
   </script>
   <style>
     body {
