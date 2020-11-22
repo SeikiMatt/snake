@@ -14,7 +14,38 @@
     const rows = 20;
     const cols = 20;
 
-    const snakeGrid = Array.from(Array(rows), () => new Array(cols).fill(0));
+    //const gameGrid = Array.from(Array(rows), () => new Array(cols).fill(0));
+
+    let snake = [
+      [6, 0],
+      [5, 0],
+      [4, 0],
+      [3, 0],
+      [2, 0],
+      [1, 0],
+      [0, 0],
+    ];
+
+    // TODO Fruit generator
+
+    // TODO Score counter
+
+    function cycleGame(direction) {
+      // TODO Collision detection (self and edges)
+      // TODO Fruit pickup detection
+      // TODO Refactor to stop mutation of snake array
+      // Maybe add sped up replay behind game over screen
+      let headLastPos = snake[0].concat();
+
+      snake.pop();
+      snake.unshift([
+        (headLastPos[0] += direction[0]),
+        (headLastPos[1] += direction[1]),
+      ]);
+
+      return snake;
+    }
+
 
     function draw(snakeGrid, fruitPos) {
       if (screen.getContext) {
