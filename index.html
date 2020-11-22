@@ -30,8 +30,25 @@
 
     // TODO Score counter
 
+    function checkSelfCollision() {
+      let snakeBody = snake.slice(1);
+      let snakeHead = snake[0].concat();
+
+      return snakeBody.some(
+        (segment) => segment[0] === snakeHead[0] && segment[1] === snakeHead[1]
+      );
+    }
+
+    function checkEdgeCollision() {
+      let head = snake[0].concat();
+      return head[0] > rows - 1 ? true
+        : head[0] < 0 ? true
+        : head[1] > cols - 1 ? true
+        : head[1] < 0 ? true
+        : false
+    }
+
     function cycleGame(direction) {
-      // TODO Collision detection (self and edges)
       // TODO Fruit pickup detection
       // TODO Refactor to stop mutation of snake array
       // Maybe add sped up replay behind game over screen
@@ -43,6 +60,8 @@
         (headLastPos[1] += direction[1]),
       ]);
 
+      if (checkSelfCollision() || checkEdgeCollision()) alert("Game Over");
+
       return snake;
     }
 
@@ -50,22 +69,18 @@
       switch (code) {
         case "KeyW":
         case "ArrowUp":
-          console.log("going up");
           cycleGame([0, -1]);
           break;
         case "KeyD":
         case "ArrowRight":
-          console.log("going right");
           cycleGame([1, -0]);
           break;
         case "KeyS":
         case "ArrowDown":
-          console.log("going down");
           cycleGame([0, 1]);
           break;
         case "KeyA":
         case "ArrowLeft":
-          console.log("going left");
           cycleGame([-1, 0]);
           break;
       }
@@ -81,7 +96,9 @@
 
         for (let x = 0; x < rows; x++) {
           for (let y = 0; y < cols; y++) {
-            ctx.fillStyle = snake.find((seg) => seg[0] === x && seg[1] === y)
+            ctx.fillStyle = snake.find(
+              (segment) => segment[0] === x && segment[1] === y
+            )
               ? "white"
               : "grey";
             ctx.fillRect(x * tileWidth, y * tileHeight, tileWidth, tileHeight);
@@ -95,7 +112,6 @@
     window.setInterval(() => {
       drawScreen(snake);
     }, 16.7);
-
   </script>
   <style>
     body {
