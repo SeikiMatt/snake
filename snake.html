@@ -46,6 +46,30 @@
       return snake;
     }
 
+    function handleInput({ code }) {
+      switch (code) {
+        case "KeyW":
+        case "ArrowUp":
+          console.log("going up");
+          cycleGame([0, -1]);
+          break;
+        case "KeyD":
+        case "ArrowRight":
+          console.log("going right");
+          cycleGame([1, -0]);
+          break;
+        case "KeyS":
+        case "ArrowDown":
+          console.log("going down");
+          cycleGame([0, 1]);
+          break;
+        case "KeyA":
+        case "ArrowLeft":
+          console.log("going left");
+          cycleGame([-1, 0]);
+          break;
+      }
+    }
 
     function draw(snakeGrid, fruitPos) {
       if (screen.getContext) {
