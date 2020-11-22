@@ -11,8 +11,8 @@
   <script>
     const screen = document.getElementById("game-field");
 
-    const rows = 20;
-    const cols = 20;
+    const rows = 25;
+    const cols = 25;
 
     //const gameGrid = Array.from(Array(rows), () => new Array(cols).fill(0));
 
@@ -71,7 +71,8 @@
       }
     }
 
-    function draw(snakeGrid, fruitPos) {
+    function drawScreen(snake, fruitPos) {
+      // TODO Optimize draw function
       if (screen.getContext) {
         const ctx = screen.getContext("2d");
 
@@ -80,16 +81,21 @@
 
         for (let x = 0; x < rows; x++) {
           for (let y = 0; y < cols; y++) {
-            ctx.fillStyle = snakeGrid[x][y] === 1 ? "white" : "grey";
+            ctx.fillStyle = snake.find((seg) => seg[0] === x && seg[1] === y)
+              ? "white"
+              : "grey";
             ctx.fillRect(x * tileWidth, y * tileHeight, tileWidth, tileHeight);
           }
         }
       }
     }
 
-    draw(snakeGrid);
+    window.addEventListener("keydown", (key) => handleInput(key));
 
-    //window.setInterval(() => draw(), 50);
+    window.setInterval(() => {
+      drawScreen(snake);
+    }, 16.7);
+
   </script>
   <style>
     body {
