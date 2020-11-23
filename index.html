@@ -6,24 +6,17 @@
     <title>Snake</title>
   </head>
   <body>
-    <canvas id="game-field" width="1000" height="500"></canvas>
+    <canvas id="game-field" width="500" height="500"></canvas>
   </body>
   <script>
     const screen = document.getElementById("game-field");
 
-    const rows = 25;
-    const cols = 50;
+    const rows = 4;
+    const cols = 4;
 
     //const gameGrid = Array.from(Array(rows), () => new Array(cols).fill(0));
 
     let snake = [
-      [9, 0],
-      [8, 0],
-      [7, 0],
-      [6, 0],
-      [5, 0],
-      [4, 0],
-      [3, 0],
       [2, 0],
       [1, 0],
       [0, 0],
@@ -95,8 +88,11 @@
       moveSnake(direction);
 
       if (fruitEaten()) {
-        generateFruit();
         growSnake();
+
+        if(snake.length >= (rows * cols)) alert("You Win!")
+
+        generateFruit();
       }
 
       if (checkSelfCollision() || checkEdgeCollision()) alert("Game Over");
@@ -141,12 +137,14 @@
 
         for (let x = 0; x < cols; x++) {
           for (let y = 0; y < rows; y++) {
+            // TODO Replace isSnake with direct translation
+            // TODO Replace isFruit with direct translation
             const isSnake = snake.find(
               (segment) => segment[0] === x && segment[1] === y
             );
-            const isFruit = fruit[0] === x && fruit[1] === y;
 
-            ctx.fillStyle = isSnake ? "white" : isFruit ? "red" : "grey";
+            const isFruit = fruit[0] === x && fruit[1] === y;
+            ctx.fillStyle = isSnake ? 'white' : isFruit ? "red" : "grey";
             ctx.fillRect(x * tileWidth, y * tileHeight, tileWidth, tileHeight);
           }
         }
@@ -159,7 +157,7 @@
 
     window.setInterval(() => {
       drawScreen(snake);
-    }, 16.7);
+    }, 100);
   </script>
   <style>
     body {
