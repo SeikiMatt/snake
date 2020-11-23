@@ -124,7 +124,7 @@
     function drawScreen(snake, fruitPos) {
       // TODO Optimize draw function
       if (screen.getContext) {
-        const ctx = screen.getContext("2d");
+        const ctx = screen.getContext("2d", { alpha: false });
 
         const tileWidth = screen.offsetWidth / cols;
         const tileHeight = screen.offsetHeight / rows;
