@@ -40,10 +40,18 @@
     }
 
     function checkEdgeCollision() {
-      let head = snake[0].concat();
-      return (
-        head[0] > cols - 1 || head[0] < 0 || head[1] > rows - 1 || head[1] < 0
-      );
+      const head = snake[0].concat();
+
+      const pastTop = head[1] < 0;
+      const pastRight = head[0] > cols - 1;
+      const pastBottom = head[1] > rows - 1;
+      const pastLeft = head[0] < 0;
+
+      return pastTop || pastRight || pastBottom || pastLeft;
+    }
+
+    function growSnake() {
+      snake.push(snake[snake.length - 1]);
     }
 
     function cycleGame(direction) {
