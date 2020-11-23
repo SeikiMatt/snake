@@ -74,8 +74,7 @@
       snake.push(snake[snake.length - 1]);
     }
 
-    function cycleGame(direction) {
-      // TODO Fruit pickup detection
+    function moveSnake(direction) {
       let headLastPos = snake[0].concat();
 
       snake.pop();
@@ -83,7 +82,13 @@
         (headLastPos[0] += direction[0]),
         (headLastPos[1] += direction[1]),
       ]);
+    }
 
+    function cycleGame(direction) {
+      // TODO Fruit pickup detection
+
+      moveSnake(direction);
+      
       if (checkSelfCollision() || checkEdgeCollision()) alert("Game Over");
 
       return snake;
