@@ -6,16 +6,20 @@
     <title>Snake</title>
   </head>
   <body>
-    <canvas id="game-field" width="500" height="500"></canvas>
+    <canvas id="game-field" width="700" height="500"></canvas>
   </body>
   <script>
     const screen = document.getElementById("game-field");
 
+    const rows = 10;
+    const cols = 14;
+
     let snake = [];
     let fruit = [];
 
-    const rows = 4;
-    const cols = 4;
+    let direction = [1, 0];
+
+    let gameSpeed = 1;
 
     // TODO Score counter
 
@@ -25,6 +29,8 @@
         [1, 0],
         [0, 0],
       ];
+
+      direction = [1, 0];
 
       generateFruit()
     }
@@ -111,19 +117,19 @@
       switch (code) {
         case "KeyW":
         case "ArrowUp":
-          cycleGame([0, -1]);
+          direction = [0, -1];
           break;
         case "KeyD":
         case "ArrowRight":
-          cycleGame([1, -0]);
+          direction = [1, -0];
           break;
         case "KeyS":
         case "ArrowDown":
-          cycleGame([0, 1]);
+          direction = [0, 1];
           break;
         case "KeyA":
         case "ArrowLeft":
-          cycleGame([-1, 0]);
+          direction = [-1, 0];
           break;
         case "Space":
           growSnake();
@@ -165,9 +171,13 @@
 
     window.addEventListener("keydown", (key) => handleInput(key));
 
+
+    // TODO Implement speed increment
     window.setInterval(() => {
+      cycleGame(direction)
       drawScreen(snake);
-    }, 100);
+    }, 250);
+
   </script>
   <style>
     body {
