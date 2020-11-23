@@ -11,20 +11,23 @@
   <script>
     const screen = document.getElementById("game-field");
 
+    let snake = [];
+    let fruit = [];
+
     const rows = 4;
     const cols = 4;
 
-    //const gameGrid = Array.from(Array(rows), () => new Array(cols).fill(0));
-
-    let snake = [
-      [2, 0],
-      [1, 0],
-      [0, 0],
-    ];
-
-    let fruit = [];
-
     // TODO Score counter
+
+    function resetGame() {
+        snake = [
+        [2, 0],
+        [1, 0],
+        [0, 0],
+      ];
+
+      generateFruit()
+    }
 
     function generateFruit() {
       let whereSnakeIsnt = [];
@@ -89,13 +92,17 @@
 
       if (fruitEaten()) {
         growSnake();
-
-        if(snake.length >= (rows * cols)) alert("You Win!")
-
+        if(snake.length >= (rows * cols)) {
+          resetGame()
+          alert("You Win!")
+        }
         generateFruit();
       }
 
-      if (checkSelfCollision() || checkEdgeCollision()) alert("Game Over");
+      if (checkSelfCollision() || checkEdgeCollision()) {
+        resetGame()
+        alert("Game Over")
+      };
 
       return snake;
     }
@@ -124,6 +131,9 @@
         case "KeyE":
           generateFruit();
           break;
+        case "KeyF":
+          resetGame();
+          break;
       }
     }
 
@@ -151,7 +161,7 @@
       }
     }
 
-    generateFruit();
+    resetGame();
 
     window.addEventListener("keydown", (key) => handleInput(key));
 
