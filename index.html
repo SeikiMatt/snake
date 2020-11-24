@@ -11,36 +11,34 @@
   <script>
     const screen = document.getElementById("game-field");
 
-    const rows = 10;
-    const cols = 14;
+    const yTiles = 10;
+    const xTiles = 14;
 
     let snake = [];
-    let fruit = [];
-
-    let direction = [1, 0];
+    let fruit = {};
 
     let gameSpeed = 1;
 
     // TODO Score counter
 
     function resetGame() {
-        snake = [
-        [2, 0],
-        [1, 0],
-        [0, 0],
+      snake = [
+        { x: 2, y: 0 },
+        { x: 1, y: 0 },
+        { x: 0, y: 0 },
       ];
 
-      direction = [1, 0];
+      turn('right')
 
-      generateFruit()
+      makeFruit();
     }
 
-    function generateFruit() {
+    function makeFruit() {
       let whereSnakeIsnt = [];
-      for (let x = 0; x < cols; x++) {
-        for (let y = 0; y < rows; y++) {
-          if (!snake.find((segment) => segment[0] === x && segment[1] === y)) {
-            whereSnakeIsnt.push([x, y]);
+      for (let x = 0; x < xTiles; x++) {
+        for (let y = 0; y < yTiles; y++) {
+          if (!snake.find((segment) => segment.x === x && segment.y === y)) {
+            whereSnakeIsnt.push({ x, y });
           }
         }
       }
@@ -49,97 +47,106 @@
         Math.random() * Math.floor(whereSnakeIsnt.length)
       );
 
-      fruit = whereSnakeIsnt[rand];
+      fruit = { x: whereSnakeIsnt[rand].x, y: whereSnakeIsnt[rand].y };
     }
 
-    function checkSelfCollision() {
+    function hasHitSelf() {
       let body = snake.slice(1);
-      let head = snake[0].concat();
+      let head = { ...snake[0] };
 
       return body.some(
-        (segment) => segment[0] === head[0] && segment[1] === head[1]
+        (segment) => segment.x === head.x && segment.y === head.y
       );
     }
 
-    function checkEdgeCollision() {
-      const head = snake[0].concat();
+    function hasHitEdge() {
+      const head = { ...snake[0] };
 
-      const pastTop = head[1] < 0;
-      const pastRight = head[0] > cols - 1;
-      const pastBottom = head[1] > rows - 1;
-      const pastLeft = head[0] < 0;
+      const pastTop = head.y < 0;
+      const pastRight = head.x > xTiles - 1;
+      const pastBottom = head.y > yTiles - 1;
+      const pastLeft = head.x < 0;
 
       return pastTop || pastRight || pastBottom || pastLeft;
     }
 
-    function fruitEaten() {
-      const head = snake[0].concat();
+    function eatenFruit() {
+      const head = { ...snake[0] };
 
-      return head[0] === fruit[0] && head[1] === fruit[1];
+      return head.x === fruit.x && head.y === fruit.y;
     }
 
     function growSnake() {
       snake.push(snake[snake.length - 1]);
     }
 
-    function moveSnake(direction) {
-      // TODO check tp stop reversing into self. e.g. going left then switching to right
-      const headLastPos = snake[0].concat();
-
-      snake.pop();
-      snake.unshift([
-        (headLastPos[0] += direction[0]),
-        (headLastPos[1] += direction[1]),
-      ]);
-    }
-
-    function cycleGame(direction) {
-      moveSnake(direction);
-
-      if (fruitEaten()) {
-        growSnake();
-        if(snake.length >= (rows * cols)) {
-          resetGame()
-          alert("You Win!")
-        }
-        generateFruit();
-      }
-
-      if (checkSelfCollision() || checkEdgeCollision()) {
-        resetGame()
-        alert("Game Over")
+    function turn(newDirection) {
+      // TODO check to stop reversing into self. e.g. going left then switching to right
+      const turn = {
+        up: { x: 0, y: -1 },
+        right: { x: 1, y: -0 },
+        bottom: { x: 0, y: 1 },
+        left: { x: -1, y: 0 },
       };
 
-      return snake;
+      direction = turn[newDirection]
+    }
+
+    function moveSnake(direction) {
+      const head = { ...snake[0] };
+
+      snake.pop();
+      snake.unshift({
+        x: (head.x += direction.x),
+        y: (head.y += direction.y),
+      });
     }
 
     function handleInput({ code }) {
       switch (code) {
         case "KeyW":
         case "ArrowUp":
-          direction = [0, -1];
+          turn("up");
           break;
         case "KeyD":
         case "ArrowRight":
-          direction = [1, -0];
+          turn("right");
           break;
         case "KeyS":
         case "ArrowDown":
-          direction = [0, 1];
+          turn("bottom");
           break;
         case "KeyA":
         case "ArrowLeft":
-          direction = [-1, 0];
+          turn("left");
           break;
         case "Space":
           growSnake();
           break;
         case "KeyE":
-          generateFruit();
+          makeFruit();
           break;
         case "KeyF":
           resetGame();
           break;
+      }
+    }
+
+    function cycleGame(direction) {
+      moveSnake(direction);
+
+      if (eatenFruit()) {
+        growSnake();
+        if (snake.length >= yTiles * xTiles) {
+          resetGame();
+          alert("You Win!");
+        }
+        makeFruit();
+      }
+
+      if (hasHitSelf() || hasHitEdge()) {
+        resetGame();
+        alert("Game Over");
       }
     }
 
@@ -148,19 +155,19 @@
       if (screen.getContext) {
         const ctx = screen.getContext("2d", { alpha: false });
 
-        const tileWidth = screen.offsetWidth / cols;
-        const tileHeight = screen.offsetHeight / rows;
+        const tileWidth = screen.offsetWidth / xTiles;
+        const tileHeight = screen.offsetHeight / yTiles;
 
-        for (let x = 0; x < cols; x++) {
-          for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < xTiles; x++) {
+          for (let y = 0; y < yTiles; y++) {
             // TODO Replace isSnake with direct translation
             // TODO Replace isFruit with direct translation
             const isSnake = snake.find(
-              (segment) => segment[0] === x && segment[1] === y
+              (segment) => segment.x === x && segment.y === y
             );
+            const isFruit = fruit.x === x && fruit.y === y;
 
-            const isFruit = fruit[0] === x && fruit[1] === y;
-            ctx.fillStyle = isSnake ? 'white' : isFruit ? "red" : "grey";
+            ctx.fillStyle = isSnake ? "white" : isFruit ? "red" : "grey";
             ctx.fillRect(x * tileWidth, y * tileHeight, tileWidth, tileHeight);
           }
         }
@@ -171,13 +178,11 @@
 
     window.addEventListener("keydown", (key) => handleInput(key));
 
-
     // TODO Implement speed increment
     window.setInterval(() => {
-      cycleGame(direction)
+      cycleGame(direction);
       drawScreen(snake);
-    }, 250);
-
+    }, 500);
   </script>
   <style>
     body {
