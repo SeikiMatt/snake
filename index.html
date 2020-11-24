@@ -62,12 +62,12 @@
     function hasHitEdge() {
       const head = { ...snake[0] };
 
-      const pastTop = head.y < 0;
-      const pastRight = head.x > xTiles - 1;
-      const pastBottom = head.y > yTiles - 1;
-      const pastLeft = head.x < 0;
+      const hitTop = head.y < 0;
+      const hitRight = head.x > xTiles - 1;
+      const hitBottom = head.y > yTiles - 1;
+      const hitLeft = head.x < 0;
 
-      return pastTop || pastRight || pastBottom || pastLeft;
+      return hitTop || hitRight || hitBottom || hitLeft;
     }
 
     function eatenFruit() {
@@ -85,7 +85,7 @@
       const turn = {
         up: { x: 0, y: -1 },
         right: { x: 1, y: -0 },
-        bottom: { x: 0, y: 1 },
+        down: { x: 0, y: 1 },
         left: { x: -1, y: 0 },
       };
 
@@ -114,7 +114,7 @@
           break;
         case "KeyS":
         case "ArrowDown":
-          turn("bottom");
+          turn("down");
           break;
         case "KeyA":
         case "ArrowLeft":
