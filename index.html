@@ -9,29 +9,27 @@
     <canvas id="game-field" width="700" height="500"></canvas>
   </body>
   <script>
-    const screen = document.getElementById("game-field");
+    const gameField = document.getElementById("game-field");
 
     const Game = (() => {
       let _snake = [];
       let _fruit = {};
+      let _direction = {};
+      let _speed = 0;
 
       const Store = {
-        setSnake: (chunk) => (_snake = chunk.map((c) => ({ ...c }))),
+        setSnake: (c) => (_snake = c.map((c) => ({ ...c }))),
         getSnake: () => _snake.map((c) => ({ ...c })),
-
-        setFruit: (fruit) => (_fruit = { ...fruit }),
+        setFruit: (f) => (_fruit = { ...f }),
         getFruit: () => ({ ..._fruit }),
+        setDirection: (d) => (_direction = { ...d }),
+        getDirection: () => ({ ..._direction }),
       };
       return Object.freeze(Store);
     })();
 
-    const yTiles = 10;
-    const xTiles = 14;
-
-    let snake = [];
-    let fruit = {};
-
-    let gameSpeed = 1;
+    const yTiles = 4;
+    const xTiles = 6;
 
     // TODO Score counter
 
@@ -41,11 +39,36 @@
         { x: 1, y: 0 },
         { x: 0, y: 0 },
       ];
-
-      makeFruit(snake);
       Game.setSnake(snake);
 
-      turn("right");
+      makeFruit(snake);
+      turnSnake("right");
+    }
+
+    function snakeHasHitSelf(snake) {
+      let body = snake.slice(1);
+      let head = { ...snake[0] };
+
+      return body.some(
+        (segment) => segment.x === head.x && segment.y === head.y
+      );
+    }
+
+    function snakeHasHitEdge(snake) {
+      const head = { ...snake[0] };
+
+      const hitTop = head.y < 0;
+      const hitRight = head.x > xTiles - 1;
+      const hitBottom = head.y > yTiles - 1;
+      const hitLeft = head.x < 0;
+
+      return hitTop || hitRight || hitBottom || hitLeft;
+    }
+
+    function snakeHasEatenFruit(snake, fruit) {
+      const head = { ...snake[0] };
+
+      return head.x === fruit.x && head.y === fruit.y;
     }
 
     function makeFruit(snake) {
@@ -67,39 +90,13 @@
       Game.setFruit(fruit);
     }
 
-    function hasHitSelf(snake) {
-      let body = snake.slice(1);
-      let head = { ...snake[0] };
-
-      return body.some(
-        (segment) => segment.x === head.x && segment.y === head.y
-      );
-    }
-
-    function hasHitEdge(snake) {
-      const head = { ...snake[0] };
-
-      const hitTop = head.y < 0;
-      const hitRight = head.x > xTiles - 1;
-      const hitBottom = head.y > yTiles - 1;
-      const hitLeft = head.x < 0;
-
-      return hitTop || hitRight || hitBottom || hitLeft;
-    }
-
-    function eatenFruit(snake, fruit) {
-      const head = { ...snake[0] };
-
-      return head.x === fruit.x && head.y === fruit.y;
-    }
-
     function growSnake(snake) {
       snake.push(snake[snake.length - 1]);
 
       Game.setSnake(snake);
     }
 
-    function turn(newDirection) {
+    function turnSnake(newDirection) {
       // TODO check to stop reversing into self. e.g. going left then switching to right
       const turn = {
         up: { x: 0, y: -1 },
@@ -108,7 +105,7 @@
         left: { x: -1, y: 0 },
       };
 
-      direction = turn[newDirection];
+      Game.setDirection(turn[newDirection]);
     }
 
     function moveSnake(snake, direction) {
@@ -127,19 +124,19 @@
       switch (code) {
         case "KeyW":
         case "ArrowUp":
-          turn("up");
+          turnSnake("up");
           break;
         case "KeyD":
         case "ArrowRight":
-          turn("right");
+          turnSnake("right");
           break;
         case "KeyS":
         case "ArrowDown":
-          turn("down");
+          turnSnake("down");
           break;
         case "KeyA":
         case "ArrowLeft":
-          turn("left");
+          turnSnake("left");
           break;
         case "Space":
           growSnake(Game.getSnake());
@@ -153,40 +150,41 @@
       }
     }
 
-    function cycleGame(direction) {
+    function cycleGame() {
       const snake = Game.getSnake();
       const fruit = Game.getFruit();
+      const direction = Game.getDirection();
 
       moveSnake(snake, direction);
 
-      if (eatenFruit(snake, fruit)) {
-        growSnake(snake);
-        if (snake.length >= yTiles * xTiles) {
-          resetGame();
-          alert("You Win!");
-        }
-        makeFruit(snake);
+      if (snakeHasHitEdge(snake) || snakeHasHitSelf(snake)) {
+        alert("Game Over");
+        resetGame();
       }
 
-      if (hasHitSelf(snake) || hasHitEdge(snake)) {
-        resetGame();
-        alert("Game Over");
+      if (snakeHasEatenFruit(snake, fruit)) {
+        growSnake(snake);
+        if (snake.length >= xTiles * yTiles) {
+          alert("You Win!");
+          resetGame();
+        }
+        makeFruit(snake);
       }
     }
 
     function drawScreen(snake, fruit) {
       // TODO Optimize draw function
-      if (screen.getContext) {
-        const ctx = screen.getContext("2d", { alpha: false });
+      if (gameField.getContext) {
+        const ctx = gameField.getContext("2d", { alpha: false });
 
-        const tileWidth = screen.offsetWidth / xTiles;
-        const tileHeight = screen.offsetHeight / yTiles;
+        const tileWidth = gameField.offsetWidth / xTiles;
+        const tileHeight = gameField.offsetHeight / yTiles;
 
         for (let x = 0; x < xTiles; x++) {
           for (let y = 0; y < yTiles; y++) {
             // TODO Replace isSnake with direct translation
             // TODO Replace isFruit with direct translation
-            const isSnake = Game.getSnake().find(
+            const isSnake = snake.find(
               (segment) => segment.x === x && segment.y === y
             );
             const isFruit = fruit.x === x && fruit.y === y;
@@ -204,7 +202,7 @@
 
     // TODO Implement speed increment
     window.setInterval(() => {
-      cycleGame(direction);
+      cycleGame();
       drawScreen(Game.getSnake(), Game.getFruit());
     }, 250);
   </script>
