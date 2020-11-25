@@ -11,6 +11,20 @@
   <script>
     const screen = document.getElementById("game-field");
 
+    const Game = (() => {
+      let _snake = [];
+      let _fruit = {};
+
+      const Store = {
+        setSnake: (chunk) => (_snake = chunk.map((c) => ({ ...c }))),
+        getSnake: () => _snake.map((c) => ({ ...c })),
+
+        setFruit: (fruit) => (_fruit = { ...fruit }),
+        getFruit: () => ({ ..._fruit }),
+      };
+      return Object.freeze(Store);
+    })();
+
     const yTiles = 10;
     const xTiles = 14;
 
@@ -22,18 +36,19 @@
     // TODO Score counter
 
     function resetGame() {
-      snake = [
+      const snake = [
         { x: 2, y: 0 },
         { x: 1, y: 0 },
         { x: 0, y: 0 },
       ];
 
-      turn('right')
+      makeFruit(snake);
+      Game.setSnake(snake);
 
-      makeFruit();
+      turn("right");
     }
 
-    function makeFruit() {
+    function makeFruit(snake) {
       let whereSnakeIsnt = [];
       for (let x = 0; x < xTiles; x++) {
         for (let y = 0; y < yTiles; y++) {
@@ -47,10 +62,12 @@
         Math.random() * Math.floor(whereSnakeIsnt.length)
       );
 
-      fruit = { x: whereSnakeIsnt[rand].x, y: whereSnakeIsnt[rand].y };
+      const fruit = { x: whereSnakeIsnt[rand].x, y: whereSnakeIsnt[rand].y };
+
+      Game.setFruit(fruit);
     }
 
-    function hasHitSelf() {
+    function hasHitSelf(snake) {
       let body = snake.slice(1);
       let head = { ...snake[0] };
 
@@ -59,7 +76,7 @@
       );
     }
 
-    function hasHitEdge() {
+    function hasHitEdge(snake) {
       const head = { ...snake[0] };
 
       const hitTop = head.y < 0;
@@ -70,14 +87,16 @@
       return hitTop || hitRight || hitBottom || hitLeft;
     }
 
-    function eatenFruit() {
+    function eatenFruit(snake, fruit) {
       const head = { ...snake[0] };
 
       return head.x === fruit.x && head.y === fruit.y;
     }
 
-    function growSnake() {
+    function growSnake(snake) {
       snake.push(snake[snake.length - 1]);
+
+      Game.setSnake(snake);
     }
 
     function turn(newDirection) {
@@ -89,10 +108,10 @@
         left: { x: -1, y: 0 },
       };
 
-      direction = turn[newDirection]
+      direction = turn[newDirection];
     }
 
-    function moveSnake(direction) {
+    function moveSnake(snake, direction) {
       const head = { ...snake[0] };
 
       snake.pop();
@@ -100,6 +119,8 @@
         x: (head.x += direction.x),
         y: (head.y += direction.y),
       });
+
+      Game.setSnake(snake);
     }
 
     function handleInput({ code }) {
@@ -121,10 +142,10 @@
           turn("left");
           break;
         case "Space":
-          growSnake();
+          growSnake(Game.getSnake());
           break;
         case "KeyE":
-          makeFruit();
+          makeFruit(Game.getSnake());
           break;
         case "KeyF":
           resetGame();
@@ -133,24 +154,27 @@
     }
 
     function cycleGame(direction) {
-      moveSnake(direction);
+      const snake = Game.getSnake();
+      const fruit = Game.getFruit();
 
-      if (eatenFruit()) {
-        growSnake();
+      moveSnake(snake, direction);
+
+      if (eatenFruit(snake, fruit)) {
+        growSnake(snake);
         if (snake.length >= yTiles * xTiles) {
           resetGame();
           alert("You Win!");
         }
-        makeFruit();
+        makeFruit(snake);
       }
 
-      if (hasHitSelf() || hasHitEdge()) {
+      if (hasHitSelf(snake) || hasHitEdge(snake)) {
         resetGame();
         alert("Game Over");
       }
     }
 
-    function drawScreen(snake, fruitPos) {
+    function drawScreen(snake, fruit) {
       // TODO Optimize draw function
       if (screen.getContext) {
         const ctx = screen.getContext("2d", { alpha: false });
@@ -162,7 +186,7 @@
           for (let y = 0; y < yTiles; y++) {
             // TODO Replace isSnake with direct translation
             // TODO Replace isFruit with direct translation
-            const isSnake = snake.find(
+            const isSnake = Game.getSnake().find(
               (segment) => segment.x === x && segment.y === y
             );
             const isFruit = fruit.x === x && fruit.y === y;
@@ -181,7 +205,7 @@
     // TODO Implement speed increment
     window.setInterval(() => {
       cycleGame(direction);
-      drawScreen(snake);
+      drawScreen(Game.getSnake(), Game.getFruit());
     }, 250);
   </script>
   <style>
