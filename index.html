@@ -6,15 +6,20 @@
     <title>Snake</title>
   </head>
   <body>
-    <canvas id="game-field" width="700" height="500"></canvas>
+    <section id="container">
+      <canvas id="game-field" width="700" height="500"></canvas>
+      <p id="score">x</p>
+    </section>
   </body>
   <script>
     const gameField = document.getElementById("game-field");
+    const scoreCounter = document.getElementById("score");
 
     const Game = (() => {
       let _snake = [];
       let _fruit = {};
       let _direction = {};
+      let _score = 0;
       let _speed = 0;
 
       const Store = {
@@ -24,14 +29,14 @@
         getFruit: () => ({ ..._fruit }),
         setDirection: (d) => (_direction = { ...d }),
         getDirection: () => ({ ..._direction }),
+        setScore: (s) => (_score = s),
+        getScore: () => _score,
       };
       return Object.freeze(Store);
     })();
 
     const yTiles = 10;
     const xTiles = 14;
-
-    // TODO Score counter
 
     function resetGame() {
       const snake = [
@@ -40,9 +45,22 @@
         { x: 0, y: 0 },
       ];
       Game.setSnake(snake);
-
+      resetScore();
       makeFruit(snake);
       turnSnake("right");
+    }
+
+    function incrementScore() {
+      let score = Game.getScore();
+      score++;
+      scoreCounter.textContent = score;
+      Game.setScore(score);
+    }
+
+    function resetScore() {
+      const score = 0;
+      scoreCounter.textContent = score;
+      Game.setScore(score);
     }
 
     function snakeHasHitSelf(snake) {
@@ -57,12 +75,12 @@
     function snakeHasHitEdge(snake) {
       const head = { ...snake[0] };
 
-      const hitTop = head.y < 0;
-      const hitRight = head.x > xTiles - 1;
-      const hitBottom = head.y > yTiles - 1;
-      const hitLeft = head.x < 0;
+      const hasHitTop = head.y < 0;
+      const hasHitRight = head.x > xTiles - 1;
+      const hasHitBottom = head.y > yTiles - 1;
+      const hasHitLeft = head.x < 0;
 
-      return hitTop || hitRight || hitBottom || hitLeft;
+      return hasHitTop || hasHitRight || hasHitBottom || hasHitLeft;
     }
 
     function snakeHasEatenFruit(snake, fruit) {
@@ -158,14 +176,15 @@
       moveSnake(snake, direction);
 
       if (snakeHasHitEdge(snake) || snakeHasHitSelf(snake)) {
-        alert("Game Over");
+        alert("Game Over\nFinal Score: " + Game.getScore());
         resetGame();
       }
 
       if (snakeHasEatenFruit(snake, fruit)) {
         growSnake(snake);
+        incrementScore();
         if (snake.length >= xTiles * yTiles) {
-          alert("You Win!");
+          alert("You Win!\nFinal Score: " + Game.getScore());
           resetGame();
         }
         makeFruit(snake);
@@ -173,7 +192,6 @@
     }
 
     function drawScreen(snake, fruit) {
-      // TODO Optimize draw function
       if (gameField.getContext) {
         const ctx = gameField.getContext("2d", { alpha: false });
 
@@ -208,18 +226,28 @@
   </script>
   <style>
     body {
-      height: 100vh;
-      width: 100vw;
-      margin: 0;
       background: #000;
+      overflow: hidden;
     }
-    #game-field {
+    #container {
+      width: 700px;
+      height: 540px;
       position: absolute;
       top: 0;
       bottom: 0;
       left: 0;
       right: 0;
       margin: auto;
+    }
+    #score {
+      color: white;
+      font-size: 2rem;
+      font-family: CR A Std, monospace;
+      text-align: center;
+      margin: 0px 0px;
+    }
+    #game-field {
+      position: relative;
       background: #222;
     }
   </style>
